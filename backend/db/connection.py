@@ -27,6 +27,7 @@ def _get_conn():
             dbname=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
+            sslmode="require"   # ✅ IMPORTANT FOR NEON
         )
 
         log.info("Database connection established")
@@ -73,7 +74,7 @@ def _format_result(cur):
     return {"columns": columns, "rows": rows, "row_count": len(rows)}
 
 
-# ✅ ONLY SQL NOW (NO CYPHER)
+# ✅ ONLY SQL (NO CYPHER)
 
 def run_sql(query: str, params: tuple = ()) -> dict:
     log.debug("SQL: %s", query[:200])
