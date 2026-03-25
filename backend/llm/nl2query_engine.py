@@ -262,7 +262,7 @@ def answer_question(question: str) -> dict[str, Any]:
     result = {
         "answer": "",
         "query": None,
-        "query_type": "none",
+        "query_type": "sql",
         "columns": [],
         "rows": [],
         "row_count": 0,
