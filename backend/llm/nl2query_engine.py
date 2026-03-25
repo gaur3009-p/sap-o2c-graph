@@ -58,8 +58,8 @@ except ImportError:
     LANGCHAIN_AVAILABLE = False
     log.warning("langchain-groq not installed — LLM calls will be stubbed")
 
-from backend.db.connection import run_sql, run_cypher
-from backend.llm.schema_context import get_full_context, get_sql_context, get_cypher_context
+from backend.db.connection import run_sql
+from backend.llm.schema_context import get_sql_context
 from backend.llm.query_safety import check_query
 
 # ── LLM initialisation ────────────────────────────────────────────────────────
@@ -283,18 +283,13 @@ def answer_question(question: str) -> dict[str, Any]:
 
         # ── Step 2: Choose query type ─────────────────────────────────────────
         log.info("Step 2: Choosing query type")
-        type_result = _llm_json(llm, QUERY_TYPE_SYSTEM, question)
-        query_type = type_result.get("query_type", "sql")
-        result["query_type"] = query_type
+        query_type = "sql"
+        result["query_type"] = "sql"
         log.info("Query type chosen: %s", query_type)
 
         # ── Step 3: Generate query ────────────────────────────────────────────
         log.info("Step 3: Generating %s query", query_type)
-        if query_type == "cypher":
-            system_prompt = CYPHER_GENERATION_SYSTEM.format(schema=get_cypher_context())
-        else:
-            system_prompt = SQL_GENERATION_SYSTEM.format(schema=get_sql_context())
-
+        system_prompt = SQL_GENERATION_SYSTEM.format(schema=get_sql_context())
         gen_result = _llm_json(llm, system_prompt, question)
 
         if gen_result.get("query") is None:
@@ -309,7 +304,7 @@ def answer_question(question: str) -> dict[str, Any]:
 
         # ── Step 4: Safety check ──────────────────────────────────────────────
         log.info("Step 4: Running safety check")
-        safety = check_query(query, query_type)
+        safety = check_query(query, "sql")
         if not safety.ok:
             log.warning("Safety check failed: %s", safety.reason)
             result["error"] = f"The generated query failed the safety check: {safety.reason}"
@@ -319,10 +314,7 @@ def answer_question(question: str) -> dict[str, Any]:
         # ── Step 5: Execute query ─────────────────────────────────────────────
         log.info("Step 5: Executing query")
         try:
-            if query_type == "cypher":
-                db_result = run_cypher(query)
-            else:
-                db_result = run_sql(query)
+            db_result = run_sql(query)
         except Exception as db_err:
             log.error("DB execution error: %s", db_err)
             # Attempt one self-correction pass
@@ -338,13 +330,10 @@ def answer_question(question: str) -> dict[str, Any]:
             corrected_query = correction.get("query")
 
             if corrected_query:
-                safety2 = check_query(corrected_query, query_type)
+                safety2 = check_query(corrected_query, "sql")
                 if safety2.ok:
                     try:
-                        if query_type == "cypher":
-                            db_result = run_cypher(corrected_query)
-                        else:
-                            db_result = run_sql(corrected_query)
+                        db_result = run_sql(query)
                         result["query"] = corrected_query
                         log.info("Self-correction succeeded")
                     except Exception as db_err2:
