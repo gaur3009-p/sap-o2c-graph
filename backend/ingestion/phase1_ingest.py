@@ -211,23 +211,35 @@ def build_sales_orders(raw: dict) -> pd.DataFrame:
     hdr = raw["sales_order_headers"].copy()
     sched = raw["sales_order_schedule_lines"].copy()
 
-    # Aggregate schedule lines: earliest confirmed delivery date per order
     if not sched.empty:
-        sched["confirmedDeliveryDate"] = parse_date(sched["confirmedDeliveryDate"])
-        confirmed = (
-            sched.groupby("salesOrder")["confirmedDeliveryDate"]
-            .min()
-            .reset_index()
-            .rename(columns={"confirmedDeliveryDate": "confirmed_delivery_date"})
+        sched["confirmedDeliveryDate"] = pd.to_datetime(
+            sched["confirmedDeliveryDate"], errors="coerce"
         )
-        hdr = hdr.merge(confirmed, on="salesOrder", how="left")
+
+        sched_clean = sched.dropna(subset=["confirmedDeliveryDate"])
+
+        if not sched_clean.empty:
+            confirmed = (
+                sched_clean.groupby("salesOrder")["confirmedDeliveryDate"]
+                .min()
+                .reset_index()
+                .rename(columns={"confirmedDeliveryDate": "confirmed_delivery_date"})
+            )
+
+            confirmed["confirmed_delivery_date"] = confirmed[
+                "confirmed_delivery_date"
+            ].dt.strftime("%Y-%m-%d")
+
+            hdr = hdr.merge(confirmed, on="salesOrder", how="left")
+        else:
+            hdr["confirmed_delivery_date"] = None
     else:
         hdr["confirmed_delivery_date"] = None
 
     out = pd.DataFrame({
         "sales_order_id":           clean_str(hdr["salesOrder"]),
         "order_type":               clean_str(hdr["salesOrderType"]),
-        "sold_to_party":            clean_str(hdr["soldToParty"]),   # FK → Customer
+        "sold_to_party":            clean_str(hdr["soldToParty"]),
         "sales_organization":       clean_str(hdr["salesOrganization"]),
         "distribution_channel":     clean_str(hdr["distributionChannel"]),
         "division":                 clean_str(hdr["organizationDivision"]),
@@ -248,7 +260,6 @@ def build_sales_orders(raw: dict) -> pd.DataFrame:
     out = deduplicate(out, "sales_order_id", "SalesOrder")
     log.info("  → %d SalesOrder nodes", len(out))
     return out
-
 
 def build_sales_order_items(raw: dict) -> pd.DataFrame:
     log.info("Building SalesOrderItem nodes …")
