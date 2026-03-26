@@ -1,10 +1,10 @@
 'use client';
 import { useCallback, useRef, useState } from 'react'
 import { Header } from '@/components/ui/Header'
-import { GraphCanvas } from '@/components/graph/GraphCanvas'
+import * as GC from '@/components/graph/GraphCanvas'
 import { ChatPanel } from '@/components/chat/ChatPanel'
 import { GripVertical, ChevronLeft, ChevronRight } from 'lucide-react'
-
+console.log(GC)
 const MIN_GRAPH_PCT = 30   // graph panel minimum width %
 const MAX_GRAPH_PCT = 80   // graph panel maximum width %
 const DEFAULT_GRAPH_PCT = 62
@@ -58,7 +58,7 @@ export default function Home() {
             Graph View
           </div>
 
-          <GraphCanvas
+          <GC.GraphCanvas
             highlightIds={graphHighlights}
             onNodeSelect={id => {
               // Selecting a node clears any chat-driven highlights
