@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { NODE_CONFIG } from '@/lib/nodeConfig'
 import type { NodeLabel } from '@/types'
 
