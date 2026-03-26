@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useCallback, useRef, useState } from 'react'
 import { Header } from '@/components/ui/Header'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
