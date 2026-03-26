@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { getNodeConfig, formatNodeId } from '@/lib/nodeConfig'
