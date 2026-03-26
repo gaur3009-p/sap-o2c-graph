@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useState } from 'react'
 import { Activity, Github, BookOpen } from 'lucide-react'
 import { api } from '@/lib/api'
