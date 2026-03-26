@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Table2 } from 'lucide-react'
 
