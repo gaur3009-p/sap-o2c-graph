@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { X, Network, ArrowRight } from 'lucide-react'
 import { getNodeConfig, formatPropValue } from '@/lib/nodeConfig'
 import { EDGE_COLORS } from '@/lib/nodeConfig'
