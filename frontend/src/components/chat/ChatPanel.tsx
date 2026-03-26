@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Send, Sparkles, AlertTriangle, Bot } from 'lucide-react'
 import { ResultTable } from './ResultTable'
